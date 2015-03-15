@@ -1,66 +1,205 @@
-import time
 from random import randint
 
-N = 8
-
 class Game:
+	turn = 0
+	def __init__(self, N, number_default_cells,Debug=False):
+		self.N = N
+		self.players = {}
+
+		self.players[Player("Player 1")] = []
+		self.players[Player("Player 2")] = []
+
+		if not Debug:
+			for player in self.players:
+				id = player.getPlayerID()
+				print "Player:",id
+				for i in range(0,number_default_cells):
+					x = randint(id*(N/2)+id,(id+1)*(N/2)-1-1+id)
+					y = randint(0,N-1)
+					while self.hasCoord((x,y)):
+						#print "Duplicate Found"
+						x = randint(id*(N/2)+id,(id+1)*(N/2)-1-1+id)
+						y = randint(0,N-1)
+					self.move((-1,-1),(x,y),player)
+
+	def getPlayers(self,id=-1):
+		if id == -1:
+			return self.players
+		else:
+			for player in self.players:
+				if player.getPlayerID() == id:
+					return player
+
+	def move(self,coord_old,coord_new,player):
+		if coord_old == (-1,-1):
+			#print "Added new coord at", coord_new
+			group = self.findGroup(coord_new,player)
+			group.addCoord(coord_new)
+
+		else:
+			group = self.findGroup(coord_old,player)
+			group.removeCoord(coord_old)
+
+			new_group = self.findGroup(coord_new,player)
+			new_group.addCoord(coord_new)
+
+			for pair in self.isTouching(new_group):
+				coord = pair[0]
+				group = pair[1]
+				group.removeCoord(coord)
+				new_group.addCoord(coord)
+
+			print "Moved from", coord_old, "==>", coord_new
+
+	def isTouching(self,group):
+		span = group.getSpanMinCorners()
+		arr = []
+		for player in self.players:
+			for group in self.players[player]:
+				for coord in group.getCoords():
+					if coord in span:
+						arr.append((coord,group))
+		return arr
+	def hasCoord(self,coord):
+		for player in self.players:
+			for group in self.players[player]:
+				if group.contains(coord):
+					return True
+			return False
+
+	def findGroup(self,coord,player,all=False):
+		span = []
+		for x in range(max(0,coord[0]-2),min(self.N-1,coord[0]+2+1)):
+			for y in range(max(0,coord[1]-2),min(self.N-1,coord[1]+2+1)):
+				##print (x,y)
+				span.append((x,y))
+		if not all:
+		#for player in self.players:
+			for group in self.players[player]:
+				if group.intersects(span):
+					#print "Group Found"
+					return group
+			group = Group()
+			self.players[player].append(group)
+			return group
+		else:
+			for player in self.players:
+				for group in self.players[player]:
+					if group.intersects(span):
+						#print "Group Found"
+						return [group,player]
+
+
+
+	def getBoard(self):
+		print "\n\n"
+		board = {}
+		for x in range(0,self.N):
+			for y in range(0,self.N):
+				board[(x,y)] = ' '
+
+		for player in self.players:
+			for group in self.players[player]:
+				if len(group.getCoords()) > 0:
+					for coord in group.getSpan():
+						board[coord] = str(player.getPlayerID())+'*'
+
+		for player in self.players:
+			for group in self.players[player]:
+				for coord in group.getCoords():
+					board[coord] = player.getPlayerID()
+
+		for x in range(0,self.N):
+			tmp = ""
+			for y in range(0,self.N):
+				tmp = "%s|%3s|" % (tmp, str(board[(x,y)]))
+			print tmp
+
+		return board
+
+class Player:
 	'Common base class for all games'
 	player_count = 0
-	turn = 0
-	board = {}
-	print "\n*** Init Board *** \n"
-	for x in range(N):
-		tmp = ""
-		for y in range(N):
-			board[(x,y)] = " "
-			tmp = tmp + str(board[(x,y)]) + "," 
-		print tmp 
-	
-	print "\n****** Done ****** \n"
-	
+
 	def __init__(self, name):
 		self.name = name
-		Game.player_count += 1
-		self.player_id = Game.player_count - 1
+		Player.player_count += 1
+		self.player_id = Player.player_count - 1
 		print "Player Joined: Name : ", self.name,  ", Player ID: ", self.player_id
-		Game.displayBoard(self)
-		
-	def displayBoard(self):
-		print "\n****** Board ****** \n"
-		for x in range(N):
-			tmp = ""
-			for y in range(N):
-				tmp = tmp + str(Game.board[(x,y)]) + "," 
-			print tmp 
 
 	def displayPlayer(self):
 		print self.name + "," +  str(self.player_id)
-	
-	def move(self,coord):
-		if Game.turn == self.player_id:
-			print "\nPlayer",self.player_id, "made a move to", coord
-			#Game.board[coord] = self.player_id
-			for x in range(coord[0]-1,coord[0]+2):
-				for y in range(coord[1]-1,coord[1]+2):
-					if x < N and y < N and x >= 0 and y >= 0:
-						if Game.board[(x,y)] == " ":
-							Game.board[(x,y)] = self.player_id
-						else:
-							Game.board[(x,y)] = "*"
-			Game.displayBoard(self)
-			Game.turn = abs(Game.turn - 1)
-			return True
-		else:
-			return False
-		
-player_1 = Game("Jaco")
-player_2 = Game("Piet")
 
-for k in range(10):
-	if not player_1.move((randint(0,N-1),randint(0,N-1))):
-		print "\n\n Its not your turn \n\n"
-	time.sleep(0.5)
+	def getPlayerID(self):
+		return self.player_id
 
-	if not player_2.move((randint(0,N-1),randint(0,N-1))):
-		print "\n\n Its not your turn \n\n"
-	time.sleep(0.5)
+class Group:
+	def __init__(self):
+		self.coords = []
+
+	def getCoords(self):
+		#print self.coords
+		return self.coords
+
+	def removeCoord(self,coord):
+		#print "Removing",coord
+		self.coords.remove(coord)
+
+	def addCoord(self,coord):
+		#print "Adding",coord
+		self.coords.append(coord)
+
+	def getCount(self):
+		print len(self.coords)
+
+	def contains(self,coord):
+		return (coord in self.coords)
+
+	def intersects(self,coords):
+		return len(set(self.getSpan())&set(coords))
+
+	def getSpan(self):
+		arr = []
+		x = []
+		y = []
+
+		for coord in self.coords:
+			x.append(coord[0])
+			y.append(coord[1])
+
+		for c_x in range(max(0,min(x)-1),max(x)+1+1):
+			tmp = ""
+			for c_y in range(max(0,min(y)-1),max(y)+1+1):
+				tmp += '(%s,%s);' % (c_x,c_y)
+				arr.append((c_x,c_y))
+			#print tmp
+		return arr
+
+	def getSpanMinCorners(self):
+		arr = []
+		x = []
+		y = []
+
+		for coord in self.coords:
+			x.append(coord[0])
+			y.append(coord[1])
+
+		for c_x in range(max(0,min(x)-2),max(x)+1+2):
+			tmp = ""
+			for c_y in range(max(0,min(y)-2),max(y)+1+2):
+				tmp += '(%s,%s);' % (c_x,c_y)
+				arr.append((c_x,c_y))
+			print tmp
+
+		arr.remove((max(x)+2,max(y)+2))
+		arr.remove((max(x)+2,max(0,min(y)-2)))
+		arr.remove((max(0,min(x)-2),max(y)+2))
+		arr.remove((max(0,min(x)-2),max(0,min(y)-2)))
+
+		return arr
+
+	def inSpan(self,coord):
+		return (coord in self.getSpan())
+
+	def overlap(self,coord):
+		return (coord in self.coords)
