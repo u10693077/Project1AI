@@ -178,7 +178,8 @@ class CreatBoard():
         print int(inCell)
 
         self.board = Tk()
-        self.board.title('Cell Wars')
+        self.board.title('Turn: Player Red')
+        
         self.creatMatrix()
         board= self.game.getBoard()
 
@@ -217,7 +218,12 @@ class CreatBoard():
                     CreatBoard.play_turn = 1
                 else:
                     CreatBoard.play_turn = 0
-                    
+
+                if(self.game.getCurrentPlayer() == 0):
+                    self.board.title("Turn: Player Red")
+                else:
+                    self.board.title("Turn: Player Blue")
+
                 self.draw()
 
         #print " "

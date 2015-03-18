@@ -5,6 +5,7 @@ class Game:
 	def __init__(self, N, number_default_cells,Debug=False):
 		self.N = N
 		self.players = {}
+		self.currPlayer = 0
 
 		self.players[Player("Player 1")] = []
 		self.players[Player("Player 2")] = []
@@ -30,6 +31,12 @@ class Game:
 				if player.getPlayerID() == id:
 					return player
 
+	def getCurrentPlayer(self):
+                return self.currPlayer
+
+        def setCurrenPlayer(self, nextPlayer):
+                self.currPlayer = nextPlayer
+
 	def move(self,coord_old,coord_new,player):
 		if coord_old == (-1,-1):
 			#print "Added new coord at", coord_new
@@ -37,6 +44,13 @@ class Game:
 			group.addCoord(coord_new)
 
 		else:
+                        print "coord"
+                        print coord_old
+                        print coord_new
+                        print coord_old[0]
+                        print ""
+
+                       
 			group = self.findGroup(coord_old,player)
 			
 			new_group = self.findGroup(coord_new,player)
@@ -51,6 +65,12 @@ class Game:
 				new_group.addCoord(coord)
 
 			print "Moved from", coord_old, "==>", coord_new
+
+			if(self.getCurrentPlayer() == 0):
+                                self.setCurrenPlayer(1)
+                        else:
+                                self.setCurrenPlayer(0)
+                                
 
 	def isTouching(self,group):
 		span = group.getSpanMinCorners()
@@ -173,9 +193,9 @@ class Group:
 			x.append(coord[0])
 			y.append(coord[1])
 
-                print "Span"
-		print x
-		print y
+                #print "Span"
+		#print x
+		#print y
 
 		for c_x in range(max(0,min(x)-1),max(x)+1+1):
 			tmp = ""
