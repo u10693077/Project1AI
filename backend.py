@@ -9,10 +9,10 @@ class Game:
 		self.N = N
 		self.players = {}
 		self.currPlayer = 0
-
+                Player.player_count= 0
 		self.players[Player("Player 1")] = []
 		self.players[Player("Player 2")] = []
-
+                
 		if not Debug:
 			for player in self.players:
 				id = player.getPlayerID()

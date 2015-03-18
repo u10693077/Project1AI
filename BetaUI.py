@@ -2,6 +2,7 @@
 #
 
 import Tkinter as tk
+import tkMessageBox
 from Tkinter import *
 import time
 from random import randint
@@ -9,6 +10,8 @@ from backend import Game
 
 TITLE_FONT = ("Helvetica", 18, "bold")
 
+##@package CellWars
+#
 #Cycle through the frames of the menu
 class CellWars(tk.Tk):
     def __init__(self, *args, **kwargs):
@@ -82,7 +85,10 @@ class PlayerVsPlayer(tk.Frame):
 		buttonBack.pack()
 
     def start(self, gridSize, initialCell):
-        CreatBoard(gridSize.get().strip(), initialCell.get().strip())
+        if(int(gridSize.get().strip()) >= 8 and int(gridSize.get().strip())%2 ==0):
+            CreatBoard(gridSize.get().strip(), initialCell.get().strip())
+        else:
+            tkMessageBox.showinfo("Info", "Grid size must be greater than 8 and be an even number.")
 
 
 #Player vs AI menu for Cell Wars
