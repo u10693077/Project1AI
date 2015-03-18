@@ -1,3 +1,6 @@
+#Jandre Coetzee 10693077
+#
+
 import Tkinter as tk
 from Tkinter import *
 import time
@@ -6,7 +9,7 @@ from backend import Game
 
 TITLE_FONT = ("Helvetica", 18, "bold")
 
-#Cycle through frames
+#Cycle through the frames of the menu
 class CellWars(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
@@ -28,7 +31,7 @@ class CellWars(tk.Tk):
         frame = self.frames[c]
         frame.tkraise()
 
-#Main menu of the game
+#Create the main menu of Cell Wars
 class StartPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -46,7 +49,7 @@ class StartPage(tk.Frame):
         button3.pack()
 
 
-#Player vs Player
+#Player vs Player menu of Cell Wars
 class PlayerVsPlayer(tk.Frame):
     def __init__(self, parent, controller):
 		tk.Frame.__init__(self, parent)
@@ -82,7 +85,7 @@ class PlayerVsPlayer(tk.Frame):
         CreatBoard(gridSize.get().strip(), initialCell.get().strip())
 
 
-#Player vs AI
+#Player vs AI menu for Cell Wars
 class PlayerVsAI(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -105,7 +108,9 @@ class PlayerVsAI(tk.Frame):
 
         labelPlyDepth= tk.Label(self, text="Ply Depth:", font=12)
         plyDepth = Entry(self, bd=5, justify=CENTER, textvariable=StringVar())
-
+        plyDepth.delete(0, END)
+	plyDepth.insert(0,"3")
+        
         aiType = IntVar()
 
         minimax = Radiobutton(self, text="Minimax", variable=aiType, value=1)
@@ -124,7 +129,7 @@ class PlayerVsAI(tk.Frame):
         buttonBack.pack()
 
 
-#AI vs AI
+#AI vs AI menu for Cell Wars
 class AIvsAI(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -147,7 +152,9 @@ class AIvsAI(tk.Frame):
 
         labelPlyDepth= tk.Label(self, text="Ply Depth:", font=12)
         plyDepth = Entry(self, bd=5, justify=CENTER, textvariable=StringVar())
-
+        plyDepth.delete(0, END)
+	plyDepth.insert(0,"3")
+        
         aiType = IntVar()
 
         minimax = Radiobutton(self, text="Minimax", variable=aiType, value=1)
@@ -199,7 +206,7 @@ class CreatBoard():
             self.all_buttons.append( buttons_row )
         self.draw()
 
-    #Player moves are captured
+    #The moves of the players are captured
     def onButtonPressed(self, y, x):
         print "pressed: x=%s y=%s" % (x, y)
         CreatBoard.pressed_count += 1
@@ -224,7 +231,7 @@ class CreatBoard():
 
                 self.draw()
 
-    #Updates the board with player moves
+    #Updates the board with the player moves
     def draw(self):
         board = self.game.getBoard()
         for c_x in range(self.N):

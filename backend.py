@@ -1,3 +1,6 @@
+#Jandre Coetzee 10693077
+#
+
 from random import randint
 
 class Game:
@@ -137,6 +140,10 @@ class Game:
 			print tmp
 
 		return board
+
+
+	def miniMax(self, player):
+                print ''
 
 class Player:
 	'Common base class for all games'
