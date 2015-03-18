@@ -6,7 +6,7 @@ from backend import Game
 
 TITLE_FONT = ("Helvetica", 18, "bold")
 
-
+#Cycle through frames
 class CellWars(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
@@ -25,10 +25,10 @@ class CellWars(tk.Tk):
         self.show_frame(StartPage)
 
     def show_frame(self, c):
-        '''Show a frame for the given class'''
         frame = self.frames[c]
         frame.tkraise()
 
+#Main menu of the game
 class StartPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -46,7 +46,7 @@ class StartPage(tk.Frame):
         button3.pack()
 
 
-
+#Player vs Player
 class PlayerVsPlayer(tk.Frame):
     def __init__(self, parent, controller):
 		tk.Frame.__init__(self, parent)
@@ -81,6 +81,8 @@ class PlayerVsPlayer(tk.Frame):
     def start(self, gridSize, initialCell):
         CreatBoard(gridSize.get().strip(), initialCell.get().strip())
 
+
+#Player vs AI
 class PlayerVsAI(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -122,7 +124,7 @@ class PlayerVsAI(tk.Frame):
         buttonBack.pack()
 
 
-
+#AI vs AI
 class AIvsAI(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -164,9 +166,9 @@ class AIvsAI(tk.Frame):
         buttonBack.pack()
 
 
+#Creates the board that will be used for the game
 class CreatBoard():
     pressed_count = 0
-    play_turn = 0
     
     def __init__(self, grSize, inCell):
 
@@ -181,12 +183,12 @@ class CreatBoard():
         self.board.title('Turn: Player Red')
         
         self.creatMatrix()
-        board= self.game.getBoard()
+        board = self.game.getBoard()
 
     def run(self):
         self.board.mainloop()
 
-
+    #Creates the matrix containing the button grid for the board
     def creatMatrix(self):
         for y, row in enumerate(self.matrix):
             buttons_row = []
@@ -197,15 +199,15 @@ class CreatBoard():
             self.all_buttons.append( buttons_row )
         self.draw()
 
-
+    #Player moves are captured
     def onButtonPressed(self, y, x):
         print "pressed: x=%s y=%s" % (x, y)
         CreatBoard.pressed_count += 1
         
-        
         if (CreatBoard.pressed_count == 1):
             self.old_coord = (x,y)
             self.all_buttons[x][y]['bg'] = '#%02x%02x%02x' % (0, 255, 0)
+            
         if (CreatBoard.pressed_count == 2):
             if self.old_coord == (x,y):
                 CreatBoard.pressed_count = 0
@@ -213,11 +215,7 @@ class CreatBoard():
                 self.draw()
             else:
                 CreatBoard.pressed_count = 0  
-                self.game.move(self.old_coord,(x,y),self.game.getPlayers(CreatBoard.play_turn))
-                if (CreatBoard.play_turn == 0):
-                    CreatBoard.play_turn = 1
-                else:
-                    CreatBoard.play_turn = 0
+                self.game.move(self.old_coord,(x,y),self.game.getPlayers(self.game.getCurrentPlayer()))
 
                 if(self.game.getCurrentPlayer() == 0):
                     self.board.title("Turn: Player Red")
@@ -226,17 +224,7 @@ class CreatBoard():
 
                 self.draw()
 
-        #print " "
-        #print "%d  %d" % (x,y)        
-        #print "Press_Count: %d" % (CreatBoard.pressed_count)
-        #print self.old_coord
-        #print " "
-        
-        # Light Red: '#%02x%02x%02x' % (255, 229, 204)
-        # ReD: '#%02x%02x%02x' % (255, 0, 0)
-        # Blue: '#%02x%02x%02x' % (0, 0, 255)
-        # Light Blue: '#%02x%02x%02x' % (204, 204, 255)
-
+    #Updates the board with player moves
     def draw(self):
         board = self.game.getBoard()
         for c_x in range(self.N):
