@@ -228,7 +228,7 @@ class CreatBoard():
                 self.draw()
             else:
                 CreatBoard.pressed_count = 0  
-                self.game.move(self.old_coord,(x,y),self.game.getPlayers(self.game.getCurrentPlayer()))
+                print self.game.move(self.old_coord,(x,y),self.game.getPlayers(self.game.getCurrentPlayer()))
 
                 if(self.game.getCurrentPlayer() == 0):
                     self.board.title("Turn: Player Red")
