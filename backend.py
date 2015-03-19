@@ -209,7 +209,7 @@ class Game:
             tmp = ""
             for y in range(0,self.N):
                 tmp = "%s|%3s|" % (tmp, str(board[(x,y)]))
-            if should_print: print tmp
+            print tmp
 
         return board
 
@@ -308,6 +308,7 @@ class Group:
                 arr.append((c_x,c_y))
             if should_print: print tmp
 
+        #removing edges
         arr.remove((max(x)+2,max(y)+2))
         arr.remove((max(x)+2,max(0,min(y)-2)))
         arr.remove((max(0,min(x)-2),max(y)+2))

@@ -1,5 +1,5 @@
 #Jandre Coetzee 10693077
-#
+#Jaco Bezuidenhout 11013878
 
 import Tkinter as tk
 import tkMessageBox
@@ -188,7 +188,7 @@ class CreatBoard():
         self.N = int(grSize)
         self.matrix = [[0 for x in range(self.N)] for x in range(self.N)]
         self.all_buttons = []
-
+        self.old_coord = (-1,-1)
         self.game = Game(self.N,int(inCell))
         print int(inCell)
 
