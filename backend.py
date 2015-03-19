@@ -3,6 +3,8 @@
 
 from random import randint
 
+should_print = False
+
 class Game:
     turn = 0
     def __init__(self, N, number_default_cells,Debug=False):
@@ -16,12 +18,12 @@ class Game:
         if not Debug:
             for player in self.players:
                 id = player.getPlayerID()
-                print "Player:",id
+                if should_print: print "Player:",id
                 for i in range(0,number_default_cells):
                     x = randint(id*(N/2)+id,(id+1)*(N/2)-1-1+id)
                     y = randint(0,N-1)
                     while self.hasCoord((x,y)):
-                        #print "Duplicate Found"
+                        #if should_print: print "Duplicate Found"
                         x = randint(id*(N/2)+id,(id+1)*(N/2)-1-1+id)
                         y = randint(0,N-1)
                     self.move((-1,-1),(x,y),player)
@@ -41,19 +43,19 @@ class Game:
             self.currPlayer = nextPlayer
 
     def move(self,coord_old,coord_new,player):
-        print "Player", player.getPlayerID(), self.getCurrentPlayer()
+        if should_print: print "Player", player.getPlayerID(), self.getCurrentPlayer()
 
         if player.getPlayerID() == self.getCurrentPlayer() or coord_old == (-1,-1):
             if coord_old == (-1,-1):
-                #print "Added new coord at", coord_new
+                #if should_print: print "Added new coord at", coord_new
                 group = self.findGroup(coord_new,player)
                 group.addCoord(coord_new)
 
             else:
-                print "coord"
-                print coord_new
-                print coord_old[0]
-                print ""
+                if should_print: print "coord"
+                if should_print: print coord_new
+                if should_print: print coord_old[0]
+                if should_print: print ""
 
                 group = self.findCoordGroup(coord_old,player)
 
@@ -62,8 +64,11 @@ class Game:
                 if not valid[0]:
                     return [False,valid[1]]
 
-                print "Found group"
-                print group.getCoords()
+
+                if should_print: print "Found group"
+                if should_print: print group.getCoords()
+
+
 
                 new_group = self.findGroup(coord_new,player)
                 new_group.addCoord(coord_new)
@@ -76,20 +81,23 @@ class Game:
                     group.removeCoord(coord)
                     new_group.addCoord(coord)
 
-                print "Moved from", coord_old, "==>", coord_new
+                if should_print: print "Moved from", coord_old, "==>", coord_new
 
                 if(self.getCurrentPlayer() == 0):
                         self.setCurrenPlayer(1)
                 else:
                         self.setCurrenPlayer(0)
-                print "Next_Player",self.getCurrentPlayer()
+                if should_print: print "Next_Player",self.getCurrentPlayer()
 
-                return [True,""]
+                for p in self.players:
+                    if (self.getNodesLeft(p) == 0):
+                        return [True,"Loser: Player",p.getPlayerID]
+
 
     def isValidMove(self,new,old,group):
         #is it the current players turn to make a move
         if group == False:
-            print "Not your turn to play"
+            if should_print: print "Not your turn to play"
             return [False,"Not your turn to play"]
 
         #is the move in a straight line (left/right/up/down)
@@ -108,13 +116,26 @@ class Game:
         return [True,""]
 
     def isTouching(self,group):
-        span = group.getSpanMinCorners()
         arr = []
         for player in self.players:
-            for group in self.players[player]:
-                for coord in group.getCoords():
-                    if coord in span:
-                        arr.append((coord,group))
+            if player.getPlayerID() == self.getCurrentPlayer():
+                span = group.getSpanWithCorners()
+                for group in self.players[player]:
+                    for coord in group.getSpan():
+                        if coord in span:
+                            print "My Own Group in span", group.getCoords()
+                            for coord in group.getCoords():
+                                arr.append((coord,group))
+                            break
+            else:
+                span = group.getSpanMinCorners()
+                for group in self.players[player]:
+                    for coord in group.getCoords():
+                        if coord in span:
+                            if should_print: print "Group in span", group.getCoords()
+                            for coord in group.getCoords():
+                                arr.append((coord,group))
+                            break
         return arr
 
     def hasCoord(self,coord):
@@ -128,13 +149,13 @@ class Game:
         span = []
         for x in range(max(0,coord[0]-2),min(self.N-1,coord[0]+2+1)):
             for y in range(max(0,coord[1]-2),min(self.N-1,coord[1]+2+1)):
-                ##print (x,y)
+                ##if should_print: print (x,y)
                 span.append((x,y))
         if not all:
         #for player in self.players:
             for group in self.players[player]:
                 if group.intersects(span):
-                    #print "Group Found"
+                    #if should_print: print "Group Found"
                     return group
             group = Group()
             self.players[player].append(group)
@@ -143,7 +164,7 @@ class Game:
             for player in self.players:
                 for group in self.players[player]:
                     if group.intersects(span):
-                        #print "Group Found"
+                        #if should_print: print "Group Found"
                         return [group,player]
 
     def findCoordGroup(self,coord,p,all=False):
@@ -151,30 +172,33 @@ class Game:
             for player in self.players:
                 for group in self.players[player]:
                     if coord in group.getCoords():
-                        #print "Group Found"
+                        #if should_print: print "Group Found"
                         return True
         else:
-
             for group in self.players[p]:
                 if coord in group.getCoords():
-                    #print "Group Found"
+                    #if should_print: print "Group Found"
                     return group
         return False
 
 
     # returns the board as an array
     def getBoard(self):
-        print "\n\n"
+        if should_print: print "\n\n"
         board = {}
         for x in range(0,self.N):
             for y in range(0,self.N):
                 board[(x,y)] = ' '
 
         for player in self.players:
+            player.displayPlayer()
             for group in self.players[player]:
+                print "Group: ",group.getCoords()
                 if len(group.getCoords()) > 0:
                     for coord in group.getSpan():
                         board[coord] = str(player.getPlayerID())+'*'
+                else:
+                    self.players[player].remove(group)
 
         for player in self.players:
             for group in self.players[player]:
@@ -185,13 +209,20 @@ class Game:
             tmp = ""
             for y in range(0,self.N):
                 tmp = "%s|%3s|" % (tmp, str(board[(x,y)]))
-            print tmp
+            if should_print: print tmp
 
         return board
 
+    #return the number of nodes in the players hand
+    def getNodesLeft(self,player):
+        total = 0
+        for group in self.players[player]:
+            total += len(group.getCoords())
+
+        return total
 
     def miniMax(self, player):
-                print ''
+                if should_print: print ''
 
 class Player:
     'Common base class for all games'
@@ -201,7 +232,7 @@ class Player:
         self.name = name
         Player.player_count += 1
         self.player_id = Player.player_count - 1
-        print "Player Joined: Name : ", self.name,  ", Player ID: ", self.player_id
+        if should_print: print "Player Joined: Name : ", self.name,  ", Player ID: ", self.player_id
 
     def displayPlayer(self):
         print self.name + "," +  str(self.player_id)
@@ -212,24 +243,24 @@ class Player:
 class Group:
     def __init__(self):
         self.coords = []
-        print self.coords
+        if should_print: print self.coords
 
     def getCoords(self):
-        #print self.coords
+        #if should_print: print self.coords
         return self.coords
 
     def removeCoord(self,coord):
-        print "Removing",coord
-        print self.coords
+        if should_print: print "Removing",coord
+        if should_print: print self.coords
         self.coords.remove(coord)
-        print self.coords
+        if should_print: print self.coords
 
     def addCoord(self,coord):
-        #print "Adding",coord
+        #if should_print: print "Adding",coord
         self.coords.append(coord)
 
     def getCount(self):
-        print len(self.coords)
+        if should_print: print len(self.coords)
 
     def contains(self,coord):
         return (coord in self.coords)
@@ -238,7 +269,7 @@ class Group:
         return len(set(self.getSpan())&set(coords))
 
     def viewCoords(self):
-                print self.coords
+                if should_print: print self.coords
 
     def getSpan(self):
         arr = []
@@ -249,16 +280,16 @@ class Group:
                 x.append(coord[0])
                 y.append(coord[1])
 
-            #print "Span"
-            #print x
-            #print y
+            #if should_print: print "Span"
+            #if should_print: print x
+            #if should_print: print y
 
             for c_x in range(max(0,min(x)-1),max(x)+1+1):
                 tmp = ""
                 for c_y in range(max(0,min(y)-1),max(y)+1+1):
                     tmp += '(%s,%s);' % (c_x,c_y)
                     arr.append((c_x,c_y))
-                print tmp
+                if should_print: print tmp
         return arr
 
     def getSpanMinCorners(self):
@@ -275,12 +306,30 @@ class Group:
             for c_y in range(max(0,min(y)-2),max(y)+1+2):
                 tmp += '(%s,%s);' % (c_x,c_y)
                 arr.append((c_x,c_y))
-            print tmp
+            if should_print: print tmp
 
         arr.remove((max(x)+2,max(y)+2))
         arr.remove((max(x)+2,max(0,min(y)-2)))
         arr.remove((max(0,min(x)-2),max(y)+2))
         arr.remove((max(0,min(x)-2),max(0,min(y)-2)))
+
+        return arr
+
+    def getSpanWithCorners(self):
+        arr = []
+        x = []
+        y = []
+
+        for coord in self.coords:
+            x.append(coord[0])
+            y.append(coord[1])
+
+        for c_x in range(max(0,min(x)-2),max(x)+1+2):
+            tmp = ""
+            for c_y in range(max(0,min(y)-2),max(y)+1+2):
+                tmp += '(%s,%s);' % (c_x,c_y)
+                arr.append((c_x,c_y))
+            if should_print: print tmp
 
         return arr
 
